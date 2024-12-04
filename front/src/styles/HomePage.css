@@ -1,0 +1,42 @@
+
+.homepage-background {
+  background-size: cover;
+  background-position: center;
+  height: 100vh;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: white;
+}
+
+.homepage-background h3 {
+  font-size: 2rem;
+  margin-bottom: 10px;
+}
+
+.homepage-background h1 {
+  font-size: 3rem;
+  margin-bottom: 20px;
+}
+
+.homepage-background p {
+  font-size: 1.5rem;
+  margin-bottom: 30px;
+}
+
+.btn {
+  margin: 10px;
+  padding: 10px 20px;
+  background-color: #6200ea;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.btn:hover {
+  background-color: #3700b3;
+}
