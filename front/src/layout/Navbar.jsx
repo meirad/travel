@@ -53,9 +53,6 @@ export default function Navbar() {
   const { isLoggedIn, isAdmin } = useAuth();  // Access isAdmin and isLoggedIn from AuthContext
   const [drawerOpen, setDrawerOpen] = useState(false);
 
-
-  console.log(isLoggedIn, isAdmin);
-
   const handleDrawerToggle = () => {
     setDrawerOpen(!drawerOpen);  // Toggle the drawer
   };
@@ -73,19 +70,33 @@ export default function Navbar() {
     <Box sx={{ flexGrow: 1 }}>
       <AppBar position="static" sx={{ backgroundColor: '#400440d4' }}>
         <Toolbar sx={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
-          <Box sx={{ display: 'flex', gap: 2 }}>
+          {/* Show only on mobile (hamburger menu and search) */}
+          <Box sx={{ display: { xs: 'flex', sm: 'none' }, alignItems: 'center' }}>
             <IconButton
               size="large"
               edge="start"
               color="inherit"
               aria-label="open drawer"
-              sx={{ mr: 2, display: { xs: 'block', sm: 'none' } }}  // Show only on small screens
               onClick={handleDrawerToggle}
             >
               <MenuIcon />
             </IconButton>
 
-            {/* Brand logo */}
+            {/* Right side: Search bar */}
+            <Search>
+              <SearchIconWrapper>
+                <SearchIcon />
+              </SearchIconWrapper>
+              <StyledInputBase
+                placeholder="Search…"
+                inputProps={{ 'aria-label': 'search' }}
+                onChange={handleSearchChange}  // Connect the search input to the context
+              />
+            </Search>
+          </Box>
+
+          {/* Show on larger screens (hide on mobile) */}
+          <Box sx={{ display: { xs: 'none', sm: 'flex' }, gap: 2 }}>
             <Button color="inherit" onClick={() => handleNavigation('/')}>
               Home
             </Button>
@@ -110,20 +121,6 @@ export default function Navbar() {
                 All Bookings
               </Button>
             )}
-          </Box>
-
-          {/* Right side: Search bar */}
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            <Search>
-              <SearchIconWrapper>
-                <SearchIcon />
-              </SearchIconWrapper>
-              <StyledInputBase
-                placeholder="Search…"
-                inputProps={{ 'aria-label': 'search' }}
-                onChange={handleSearchChange}  // Connect the search input to the context
-              />
-            </Search>
           </Box>
         </Toolbar>
       </AppBar>
