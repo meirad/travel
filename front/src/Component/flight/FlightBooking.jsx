@@ -44,7 +44,17 @@ const FlightBooking = () => {
     });
 
     const [bookingResponse, setBookingResponse] = useState(null);
-    const [error, setError] = useState(null);
+    const [error, setError] = useState({
+        traveler: {
+            firstName: '',
+            lastName: '',
+            phoneNumber: '',
+        },
+        payment: {
+            cardNumber: '',
+            cvv: '',
+        },
+    });
 
     useEffect(() => {
         if (!flight) {
@@ -55,48 +65,76 @@ const FlightBooking = () => {
     const handleTravelerChange = (e) => {
         const { name, value } = e.target;
 
-        // Set the value without any validation for now
         setTravelerInfo({ ...travelerInfo, [name]: value });
-        setError(null); // Clear any previous errors
-    };
-
-    const handleBlur = (e) => {
-        const { name, value } = e.target;
-
-        // Validate phone number on blur
-        if (name === 'phoneNumber' && !/^\+972\d{8}$/.test(value)) {
-            setError('Please enter a valid Israeli phone number.');
-        } else if (name === 'firstName' && value.length < 2) {
-            setError('First name must be at least 2 characters long.');
-        } else if (name === 'lastName' && value.length < 2) {
-            setError('Last name must be at least 2 characters long.');
-        } else {
-            setError(null); // Clear error if valid
-        }
+        setError((prevError) => ({
+            ...prevError,
+            traveler: {
+                ...prevError.traveler,
+                [name]: '',
+            },
+        }));
     };
 
     const handlePaymentChange = (e) => {
         const { name, value } = e.target;
         setPaymentInfo({ ...paymentInfo, [name]: value });
+
+        setError((prevError) => ({
+            ...prevError,
+            payment: {
+                ...prevError.payment,
+                [name]: '',
+            },
+        }));
+    };
+
+    const handleBlur = (e) => {
+        const { name, value } = e.target;
+    
+        if (name === 'phoneNumber' && !/^05\d{8}$/.test(value)) {
+            setError((prevError) => ({
+                ...prevError,
+                traveler: { ...prevError.traveler, phoneNumber: 'Please enter a valid Israeli phone number.' },
+            }));
+        } else if (name === 'firstName' && value.length < 2) {
+            setError((prevError) => ({
+                ...prevError,
+                traveler: { ...prevError.traveler, firstName: 'First name must be at least 2 characters long.' },
+            }));
+        } else if (name === 'lastName' && value.length < 2) {
+            setError((prevError) => ({
+                ...prevError,
+                traveler: { ...prevError.traveler, lastName: 'Last name must be at least 2 characters long.' },
+            }));
+        }
     };
 
     const handleBooking = async () => {
         const userId = localStorage.getItem('userId');
-
+    
         if (!userId) {
-            setError('User is not logged in. Please log in to book a flight.');
+            setError((prevError) => ({
+                ...prevError,
+                general: 'User is not logged in. Please log in to book a flight.',
+            }));
             return;
         }
-
+    
         // Validate Credit Card
         if (!/^\d{13,19}$/.test(paymentInfo.cardNumber)) {
-            setError('Invalid card number. It should be between 13 and 19 digits.');
+            setError((prevError) => ({
+                ...prevError,
+                payment: { ...prevError.payment, cardNumber: 'Invalid card number. It should be between 13 and 19 digits.' },
+            }));
             return;
         }
-
+    
         // Validate CVV
         if (!/^\d{3}$/.test(paymentInfo.cvv)) {
-            setError('CVV should be exactly 3 digits.');
+            setError((prevError) => ({
+                ...prevError,
+                payment: { ...prevError.payment, cvv: 'CVV should be exactly 3 digits.' },
+            }));
             return;
         }
 
@@ -143,7 +181,10 @@ const FlightBooking = () => {
             navigate('/booking-confirmation', { state: { bookingDetails: response.data } });
         } catch (err) {
             const message = err.response?.data?.error || 'Failed to book flight. Please try again.';
-            setError(message);
+            setError((prevError) => ({
+                ...prevError,
+                general: message,
+            }));
             setBookingResponse(null);
         }
     };
@@ -209,8 +250,8 @@ const FlightBooking = () => {
                             onChange={handleTravelerChange}
                             onBlur={handleBlur}
                             variant="outlined"
-                            helperText={error && error.includes('First name') ? error : ''}
-                            error={error && error.includes('First name')}
+                            helperText={error.traveler.firstName || ''}
+                            error={!!error.traveler.firstName}
                         />
                     </Grid>
                     <Grid item xs={12} md={6}>
@@ -222,8 +263,8 @@ const FlightBooking = () => {
                             onChange={handleTravelerChange}
                             onBlur={handleBlur}
                             variant="outlined"
-                            helperText={error && error.includes('Last name') ? error : ''}
-                            error={error && error.includes('Last name')}
+                            helperText={error.traveler.lastName || ''}
+                            error={!!error.traveler.lastName}
                         />
                     </Grid>
                     <Grid item xs={12} md={6}>
@@ -258,8 +299,8 @@ const FlightBooking = () => {
                             onChange={handleTravelerChange}
                             onBlur={handleBlur}
                             variant="outlined"
-                            helperText={error || "Enter a valid Israeli phone number."}
-                            error={!!error}
+                            helperText={error.traveler.phoneNumber || "Enter a valid Israeli phone number."}
+                            error={!!error.traveler.phoneNumber}
                         />
                     </Grid>
                     <Grid item xs={12}>
@@ -285,6 +326,8 @@ const FlightBooking = () => {
                             name="cardNumber"
                             value={paymentInfo.cardNumber}
                             onChange={handlePaymentChange}
+                            helperText={error.payment.cardNumber || 'Enter a valid card number.'}
+                            error={!!error.payment.cardNumber}
                             variant="outlined"
                         />
                     </Grid>
@@ -307,12 +350,14 @@ const FlightBooking = () => {
                             name="cvv"
                             value={paymentInfo.cvv}
                             onChange={handlePaymentChange}
+                            helperText={error.payment.cvv || ''}
+                            error={!!error.payment.cvv}
                             variant="outlined"
                         />
                     </Grid>
                 </Grid>
 
-                {error && <Alert severity="error" sx={{ mb: 3 }}>{error}</Alert>}
+                {error.general && <Alert severity="error" sx={{ mb: 3 }}>{error.general}</Alert>}
                 <Button
                     variant="contained"
                     color="primary"
