@@ -10,13 +10,16 @@ import SavedFlight from "./Routers/SavedFlights.mjs";
 import testimonialRoutes from "./Routers/testimonials.mjs";
 import contactRoutes from './Routers/contact.mjs';
 import axios from 'axios';
-
+import morgan from 'morgan'; // Import morgan for logging
 
 dotenv.config();
 
 const app = express();
 app.use(cors());
 app.use(express.json());
+
+// Use morgan to log all HTTP requests
+app.use(morgan('dev')); // 'dev' is the pre-configured format for concise logs (e.g., :method :url :status)
 
 // Ensure the environment variables are loaded properly
 console.log('AMADEUS_API_KEY:', process.env.AMADEUS_API_KEY);
@@ -58,8 +61,6 @@ if (!token) {
     console.log('Amadeus client initialized successfully.');
 }
 
-
-
 // Connect to MongoDB
 async function main() {
     try {
@@ -71,9 +72,8 @@ async function main() {
 }
 main();
 
-// Use routes
+// Routes for different endpoints
 flightRoutes(app, amadeus);
-
 
 app.use("/auth", authRoutes);
 app.use('/users', userRoutes);
