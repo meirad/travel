@@ -10,7 +10,7 @@ import SavedFlight from "./Routers/SavedFlights.mjs";
 import testimonialRoutes from "./Routers/testimonials.mjs";
 import contactRoutes from './Routers/contact.mjs';
 import axios from 'axios';
-import morgan from 'morgan'; // Import morgan for logging
+import morgan from 'morgan'; 
 
 dotenv.config();
 
