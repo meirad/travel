@@ -37,8 +37,12 @@ const MyBooking = () => {
                 setBookings(response.data.bookings || []);
                 setError('');
             } catch (err) {
-                console.error('Error fetching bookings:', err);
-                setError('Failed to fetch bookings.');
+                if (err.response.status === 404) {
+                    setError('No bookings found under your account.');
+                } else {
+                    console.error('Error fetching bookings:', err);
+                    setError('Failed to fetch bookings.');
+                }
             } finally {
                 setLoading(false);
             }
@@ -155,7 +159,12 @@ const MyBooking = () => {
                 My Bookings
             </Typography>
 
-            {bookings.length > 0 ? (
+            {/* Display message if no bookings */}
+            {bookings.length === 0 ? (
+                <Typography variant="h6" color="textSecondary">
+                    No bookings found under your account.
+                </Typography>
+            ) : (
                 bookings.map((booking) => (
                     <Card
                         key={booking._id}
@@ -236,8 +245,6 @@ const MyBooking = () => {
                         </CardContent>
                     </Card>
                 ))
-            ) : (
-                <Typography>No bookings found.</Typography>
             )}
 
             {/* Edit Modal */}
