@@ -64,7 +64,7 @@ if (!token) {
 // Connect to MongoDB
 async function main() {
     try {
-        await mongoose.connect(process.env.MONGO_URI);
+        await mongoose.connect(process.env.MONGO_DB_URL);
         console.log("MongoDB connection established");
     } catch (error) {
         console.error("MongoDB connection failed:", error);
