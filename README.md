@@ -8,7 +8,7 @@ Backend: Provides flight data from Amadeus API, handles booking, user authentica
 Database: Uses MongoDB to store user and booking information.
 Payment: Collects payment information and processes bookings securely.
 
-
+TO RUN THE PROJECT NEED AT LEAST NODE VER 20 +
 
 How to Set Up the Project
 
