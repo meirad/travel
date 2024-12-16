@@ -36,40 +36,58 @@ const SavedFlightsPage = () => {
         setLoading(false);
       }
     };
-
-    // Filter the saved flights based on the search query
-    const filtered = savedFlights.filter((flight) => {
-      const lowerQuery = searchQuery.toLowerCase();
-      return (
-        flight.flightDetails.price.total.toString().toLowerCase().includes(lowerQuery) ||
-        (flight.flightDetails.validatingAirlineCodes[0] && airlineNames[flight.flightDetails.validatingAirlineCodes[0]]?.toLowerCase().includes(lowerQuery)) ||
-        (flight.flightDetails.itineraries[0].segments[0].departure.iataCode && airportNames[flight.flightDetails.itineraries[0].segments[0].departure.iataCode]?.toLowerCase().includes(lowerQuery)) ||
-        (flight.flightDetails.itineraries[0].segments[0].arrival.iataCode && airportNames[flight.flightDetails.itineraries[0].segments[0].arrival.iataCode]?.toLowerCase().includes(lowerQuery))
-      );
-    });
-    setFilteredFlights(filtered);
-
+  
     fetchSavedFlights();
+  }, []);
+  
+  useEffect(() => {
+    if (searchQuery) {
+      const lowerQuery = searchQuery.toLowerCase();
+      const filtered = savedFlights.filter((flight) => {
+        return (
+          flight.flightDetails.price.total.toString().toLowerCase().includes(lowerQuery) ||
+          (flight.flightDetails.validatingAirlineCodes[0] && airlineNames[flight.flightDetails.validatingAirlineCodes[0]]?.toLowerCase().includes(lowerQuery)) ||
+          (flight.flightDetails.itineraries[0].segments[0].departure.iataCode && airportNames[flight.flightDetails.itineraries[0].segments[0].departure.iataCode]?.toLowerCase().includes(lowerQuery)) ||
+          (flight.flightDetails.itineraries[0].segments[0].arrival.iataCode && airportNames[flight.flightDetails.itineraries[0].segments[0].arrival.iataCode]?.toLowerCase().includes(lowerQuery))
+        );
+      });
+      setFilteredFlights(filtered);
+    } else {
+      setFilteredFlights(savedFlights);
+    }
   }, [searchQuery, savedFlights]);
+  
 
   const handleSelectFlight = (flight) => {
     navigate(`/flight/${flight.id}`, { state: { flight } });
   };
 
+
   const handleRemoveFlight = async (flightId) => {
+    console.log('Attempting to remove flight with ID:', flightId); // Debug log
+  
     try {
-      await axios.delete(`http://localhost:6996/flights/saved-flights/${flightId}`, {
+      const response = await axios.delete(`http://localhost:6996/flights/saved-flights/${flightId}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('authToken')}`,
         },
       });
-
-      setSavedFlights(prev => prev.filter(flight => flight.flightDetails.id !== flightId)); 
+  
+      console.log('Delete response:', response.data);
+  
+      // Update saved flights state
+      setSavedFlights((prev) => prev.filter((flight) => flight._id !== flightId));
       alert('Flight removed from saved list!');
     } catch (error) {
       console.error('Error removing saved flight:', error);
+      if (error.response) {
+        console.error('Server Response Data:', error.response.data);
+        console.error('Server Response Status:', error.response.status);
+      }
     }
   };
+  
+ 
 
   return (
     <Box sx={{ padding: '20px', maxWidth: '1200px', margin: '0 auto' }}>
@@ -110,7 +128,7 @@ const SavedFlightsPage = () => {
                   variant="outlined"
                   color="error"
                   sx={{ mt: 2 }}
-                  onClick={() => handleRemoveFlight(flight.flightDetails.id)}
+                  onClick={() => handleRemoveFlight(flight._id)} // Use _id instead of flightDetails.id
                 >
                   Remove
                 </Button>
